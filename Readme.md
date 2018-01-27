@@ -2,6 +2,8 @@
 
 This repository contains Simple implementation of word and char RNN with tensorflow.
 
+More info in [blog](https://code-freaks.github.io/#/read/tensorflow-char_rnn)
+
 # Install dependencies
 
 ```

@@ -40,16 +40,12 @@ n_hidden = 512
 x = tf.placeholder("float", [None, n_input, 1])
 y = tf.placeholder("float", [None, vocab_size])
 
-# RNN output node weights and biases
-weights = {
-    "out": tf.Variable(tf.random_normal([n_hidden, vocab_size]))
-}
-biases = {
-    "out": tf.Variable(tf.random_normal([vocab_size]))
-}
 
+def RNN(x, n_hidden, vocab_size):
+    # RNN output node weights and biases
+    weight = tf.Variable(tf.random_normal([n_hidden, vocab_size]))
+    bias = tf.Variable(tf.random_normal([vocab_size]))
 
-def RNN(x, weights, biases):
     # reshape to [1, n_input]
     x = tf.reshape(x, [-1, n_input])
 
@@ -60,10 +56,10 @@ def RNN(x, weights, biases):
     # generate prediction
     outputs, states = rnn.static_rnn(rnn_cell, x, dtype=tf.float32)
 
-    return tf.matmul(outputs[-1], weights["out"]) + biases["out"]
+    return tf.matmul(outputs[-1], weight) + bias
 
 
-pred = RNN(x, weights, biases)
+pred = RNN(x, n_hidden, vocab_size)
 
 # Loss and optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
@@ -81,7 +77,6 @@ with tf.Session() as session:
     session.run(init)
     step = 0
     offset = random.randint(0, n_input+1)
-    end_offset = n_input + 1
     acc_total = 0
     loss_total = 0
 
@@ -89,7 +84,7 @@ with tf.Session() as session:
 
     while step < training_iters:
         # Generate a minibatch. Add some randomness on selection process.
-        if offset > (len(training_data)-end_offset):
+        if offset > (len(training_data)-(n_input + 1)):
             offset = random.randint(0, n_input+1)
 
         symbols_in_keys = [ [dictionary[ str(training_data[i])]] for i in range(offset, offset+n_input) ]
