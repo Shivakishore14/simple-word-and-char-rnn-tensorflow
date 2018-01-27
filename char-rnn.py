@@ -6,7 +6,7 @@ from tensorflow.contrib import rnn
 
 filename = __file__
 
-logs_path = "/tmp/tensorflow/rnn"
+logs_path = "./logs/char-rnn"
 writer = tf.summary.FileWriter(logs_path)
 
 def read_data(fname):
@@ -31,7 +31,7 @@ vocab_size = len(vocab)
 learning_rate = 0.001
 training_iters = 50000
 display_step = 500
-n_input = 10
+n_input = 4
 
 # number of units in RNN cell
 n_hidden = 512
@@ -97,7 +97,7 @@ with tf.Session() as session:
 
         symbols_out_onehot = np.zeros([vocab_size], dtype=float)
         symbols_out_onehot[dictionary[str(training_data[offset+n_input])]] = 1.0
-        symbols_out_onehot = np.reshape(symbols_out_onehot,[1,-1])
+        symbols_out_onehot = np.reshape(symbols_out_onehot, [1, -1])
 
         _, acc, loss, onehot_pred = session.run([optimizer, accuracy, cost, pred], \
                                                 feed_dict={x: symbols_in_keys, y: symbols_out_onehot})
@@ -112,17 +112,7 @@ with tf.Session() as session:
             symbols_in = [training_data[i] for i in range(offset, offset + n_input)]
             symbols_out = training_data[offset + n_input]
             symbols_out_pred = reverse_dictionary[int(tf.argmax(onehot_pred, 1).eval())]
-            print("%s - [%s] vs [%s]" % (symbols_in,symbols_out,symbols_out_pred))
-            symbols_in_num = [dictionary[training_data[i]] for i in range(offset, offset + n_input)]
-            for t in range(100):
-                symbols_in_keys = np.reshape(np.array(symbols_in_num), [-1, n_input, 1])
-                out_1hot = session.run(pred, feed_dict={x: symbols_in_keys})[0]
-                # print out_1hot
-                out_ = int(np.argmax(out_1hot))
-                # print out_
-                # print symbols_in_num
-                symbols_in_num = symbols_in_num[1:] + [out_]
-                print reverse_dictionary[out_],
+            print("%s - [%s] vs [%s]" % (symbols_in, symbols_out, symbols_out_pred))
 
         step += 1
         offset += (n_input+1)
